@@ -4,12 +4,7 @@ import asyncore
 
 import os
 
-READ_POLL = 2
-
-
 interesting = []
-
-#loop = asyncio.get_event_loop()
 
 async def tail(f, lines=1, _buffer=4098):
     lines_found = []
@@ -29,24 +24,22 @@ async def tail(f, lines=1, _buffer=4098):
     return lines_found[-lines:]
 
 
+async def get_tail(filename):
+    async with aiofiles.open(filename, mode='r') as f:
+        lines = await tail(f)
+        if lines:
+            line = lines[0]
+            return line.strip()
+
+
 async def watch_logs():
-    last_line = None
-    while True:
-        for filename in interesting:
-            async with aiofiles.open(filename, mode='r') as f:
-                lines = await tail(f)
-                if lines:
-                    line = lines[0]
-                    if line != last_line and line.strip():
-                        print(line.strip())
-                        last_line = line
-                await asyncio.sleep(READ_POLL)
+    results = []
+    for filename in interesting:
+        line = await get_tail(filename)
+        results.append(line)
+    return results
 
 
 async def check_for_messages():
-    await watch_logs()
-
-
-
-#loop.run_until_complete(watch_logs())
-#loop.close()
+    results = await watch_logs()
+    return results
