@@ -1,32 +1,47 @@
 import aiohttp
 from aiohttp import web
 import asyncio
+from threading import Thread
 
 from slippy.server_tasks import check_for_messages
 
 
+loop = asyncio.get_event_loop()
+
+
+async def start_checks(q):
+    while True:
+        message = await check_for_messages()
+        await q.put(message)
+        await asyncio.sleep(2)
+    
+
+def listen(q=None):
+    if q is None:
+        q = asyncio.Queue()
+    loop.create_task(start_checks(q))
+    return q
+    
+
 async def websocket_handler(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
-
-    async for msg in ws:
-        if msg.type == aiohttp.WSMsgType.TEXT:
-            if msg.data == 'close':
-                await ws.close()
-            if msg.data == 'initialise':
-                print('Initialising client connection')
-                buff = []
-                while True:
-                    messages = await check_for_messages()
-                    for message in messages:
-                        if message not in buff:
-                            ws.send_str(message)
-                            buff.append(message)
-                    await asyncio.sleep(2)
-        elif msg.type == aiohttp.WSMsgType.ERROR:
-            print('websocket connection closed {}'.format(ws.exception()))
-    print('websocket closed')
     
+    q = listen()
+
+    seen = []
+
+    while True:
+        msg = await q.get()
+        if msg is None:
+            break
+        else:
+            for m in msg:
+                if m not in seen:
+                    ws.send_str(m)
+                    seen.append(m)
+
+    await ws.close()
     return ws
 
 
