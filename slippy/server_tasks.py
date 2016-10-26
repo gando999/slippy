@@ -7,10 +7,7 @@ import os
 READ_POLL = 2
 
 
-interesting = [
-    '/Users/garyanderson/Temp/my_log.txt',
-    '/Users/garyanderson/Temp/my_log2.txt'
-]
+interesting = []
 
 #loop = asyncio.get_event_loop()
 
@@ -46,7 +43,7 @@ async def watch_logs():
                 await asyncio.sleep(READ_POLL)
 
 
-async def check_for_tasks():
+async def check_for_messages():
     await watch_logs()
 
 
