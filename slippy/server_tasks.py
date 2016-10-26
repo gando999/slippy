@@ -4,7 +4,7 @@ import asyncore
 
 import os
 
-interesting = ['/Users/garyanderson/Temp/my_log.txt']
+interesting = []
 
 async def tail(f, lines=1, _buffer=4098):
     lines_found = []
