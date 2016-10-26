@@ -1,6 +1,8 @@
 import aiohttp
 from aiohttp import web
 
+from slippy.server_tasks import check_for_messages
+
 
 async def websocket_handler(request):
     ws = web.WebSocketResponse()
@@ -10,14 +12,15 @@ async def websocket_handler(request):
         if msg.type == aiohttp.WSMsgType.TEXT:
             if msg.data == 'close':
                 await ws.close()
-            if msg.data == 'updates':
-                print('Received message')
-                ws.send_str('this is an update')
+            if msg.data == 'initialise':
+                print('Initialising client connection')
+                messages = await check_for_messages()
+                for message in messages:
+                    ws.send_str(message)
         elif msg.type == aiohttp.WSMsgType.ERROR:
-            print('ws connection closed {}'.format(ws.exception()))
-
+            print('websocket connection closed {}'.format(ws.exception()))
     print('websocket closed')
-
+    
     return ws
 
 

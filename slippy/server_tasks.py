@@ -7,9 +7,12 @@ import os
 READ_POLL = 2
 
 
-interesting = []
+interesting = [
+    '/Users/garyanderson/Temp/my_log.txt',
+    '/Users/garyanderson/Temp/my_log2.txt'
+]
 
-loop = asyncio.get_event_loop()
+#loop = asyncio.get_event_loop()
 
 async def tail(f, lines=1, _buffer=4098):
     lines_found = []
@@ -43,5 +46,10 @@ async def watch_logs():
                 await asyncio.sleep(READ_POLL)
 
 
-loop.run_until_complete(watch_logs())
-loop.close()
+async def check_for_tasks():
+    await watch_logs()
+
+
+
+#loop.run_until_complete(watch_logs())
+#loop.close()
