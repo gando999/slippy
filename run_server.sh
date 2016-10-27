@@ -1,3 +1,3 @@
 #!/bin/sh
 
-python -m aiohttp.web -H localhost -P 8080 slippy.server:init_func
+python -m aiohttp.web -H 0.0.0.0 -P 8080 slippy.server:init_func
