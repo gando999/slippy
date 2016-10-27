@@ -8,10 +8,12 @@ from slippy.server_tasks import check_for_messages
 
 loop = asyncio.get_event_loop()
 
+interesting = []
 
-async def start_checks(q):
+
+async def start_checks(q, filename):
     while True:
-        message = await check_for_messages()
+        message = await check_for_messages(filename)
         await q.put(message)
         await asyncio.sleep(2)
     
@@ -19,7 +21,8 @@ async def start_checks(q):
 def listen(q=None):
     if q is None:
         q = asyncio.Queue()
-    loop.create_task(start_checks(q))
+    for filename in interesting:
+        loop.create_task(start_checks(q, filename))
     return q
     
 
@@ -36,10 +39,9 @@ async def websocket_handler(request):
         if msg is None:
             break
         else:
-            for m in msg:
-                if m not in seen:
-                    ws.send_str(m)
-                    seen.append(m)
+            if msg not in seen:
+                ws.send_str(msg)
+                seen.append(msg)
 
     await ws.close()
     return ws

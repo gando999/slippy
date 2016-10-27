@@ -4,7 +4,6 @@ import asyncore
 
 import os
 
-interesting = []
 
 async def tail(f, lines=1, _buffer=4098):
     lines_found = []
@@ -32,14 +31,6 @@ async def get_tail(filename):
             return line.strip()
 
 
-async def watch_logs():
-    results = []
-    for filename in interesting:
-        line = await get_tail(filename)
-        results.append(line)
-    return results
-
-
-async def check_for_messages():
-    results = await watch_logs()
+async def check_for_messages(filename):
+    results = await get_tail(filename)
     return results
